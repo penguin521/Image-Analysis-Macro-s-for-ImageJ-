@@ -215,7 +215,7 @@ The macros are intended as research tools and should be validated for each imagi
 
 ## License
 
-Users may add a license describing how the macros can be used, modified, and distributed. The MIT License is one commonly used option for openly shared research code.
+idk
 
 ## Author
 
