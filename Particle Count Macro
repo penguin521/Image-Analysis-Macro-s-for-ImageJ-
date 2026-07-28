@@ -1,0 +1,73 @@
+
+//Counting POS Particles
+
+Dialog.create("POS particles");
+   	Dialog.addDirectory("Select a directory","");
+	Dialog.addNumber("Max Percentage", 25);
+	Dialog.addNumber("Min Percentage", 22);
+	Dialog.addNumber("Micron Size Min", 0.15);
+	Dialog.addNumber("Micron Size Max", 5);
+	
+
+Dialog.show();
+dir = Dialog.getString();
+maxPercentage = Dialog.getNumber();
+minPercentage = Dialog.getNumber();
+number = Dialog.getNumber();
+maxnumber = Dialog.getNumber();
+
+setBatchMode(true);
+
+// Get a list of all files in the directory
+list = getFileList(dir);
+
+
+
+finalfolder = dir + "/finalfolder";
+if (!File.exists(finalfolder)){
+	File.makeDirectory(finalfolder);
+}
+
+// Loop through the list of files
+for (i = 0; i < list.length; i++) {
+    								// Constructs the full file path. a filepath is the directions a computer takes to access your files/images
+    filePath = dir + "/" + list[i];
+    
+    // Check if the file is an image 
+    if (endsWith(filePath, ".nd2")) {                            //this is currently set to only open and analyze images that end with ".nd2"
+        open(filePath);  //original script for analyzing image
+
+    	run("Z Project...", "projection=[Max Intensity]");
+	run("Duplicate...", "duplicate channels=2");
+	run("Enhance Contrast", "saturated=0.35");
+
+
+	MaxPixelValue = 4095;
+	maximumvalue = (maxPercentage / 100.0) * MaxPixelValue;
+
+	minimumvalue = (minPercentage/ 100.0) * MaxPixelValue;
+
+
+	setMinAndMax(minimumvalue, maximumvalue);
+
+	run("8-bit");
+                                          //shouldn't be touched if the contrast is good enough. most of code is already robust
+	setThreshold(1, 255);
+	run("Convert to Mask");
+	// This entire section below can be deleted if you don't want to save images
+	// -------------------
+	filename = File.getName(filePath);                                // gets the original name of document. ie: "fath h9cln3 exo fticpos cer546 zo1647 20x3-2.tif"
+	folderPath = finalfolder + "/" + filename;                              // reconstructs a filepath for new image
+	saveAs("tiff", folderPath);
+	// --------------------
+	
+
+
+        run("Analyze Particles...", "size=" + number + "-" + maxnumber + " clear summarize overlay");
+        //closes all the images
+	//close(); 
+	//close();
+	//close();
+
+    }
+}
